@@ -8,6 +8,7 @@
                     <div class="columns is-centered">
                         <div class="column is-full-mobile is-7-tablet is-6-desktop is-5-widescreen">
                             <div class="box">
+                                <message ref="message"></message>
                                 <div class="content">
                                     <p class="has-text-justified">
                                         Witamy wszystkich klientów naszego serwisu na stronie logowania.
@@ -58,9 +59,11 @@
 
 <script>
     import axios from 'axios'
+    import Message from "./assets/message.vue";
 
     export default {
         name: "loginView",
+        components: {Message},
         data(){
             return {
                 email: "",
@@ -73,7 +76,24 @@
         },
 
         methods: {
+            validate: function(){
+                let ret = true
+                if(this.email == "") {
+                    ret = false
+                    this.errors.email = "Pole nie moze byc puste"
+                }
+
+                if(this.pass == "") {
+                    ret = false
+                    this.errors.pass = "Pole nie moze byc puste"
+                }
+
+                return ret
+            },
+
             login: function(){
+                if(this.validate() == false) return
+
                 axios.post('/usermanagementopen/verifyuser', {
                     username: this.email.replace(/ /g, ''),
                     password: this.pass,
@@ -110,7 +130,10 @@
                             this.errors.pass = "Niepoprawne hasło"
                         }
                     }
-                }).catch(e => console.error(e))
+                }).catch(e => {
+                    console.error(e)
+                    this.$refs.message.showDanger("",e.toString())
+                })
 
             }
         }
