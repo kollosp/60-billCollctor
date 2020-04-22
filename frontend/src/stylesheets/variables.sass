@@ -1,0 +1,40 @@
+$brand-yellow: #ffa845
+$brand-yellow-light: #ffce8b
+$brand-blue: #47a9d8
+$brand-blue-2: #4f89c9
+
+$green: #439A2C
+
+.has-background-brand-yellow
+  background-color: $brand-yellow-light !important
+
+.has-background-brand-yellow-main
+  background-color: $brand-yellow !important
+.has-background-brand-blue-2
+  background-color: $brand-blue-2 !important
+
+.page-wrapper
+  padding: 3rem 1rem 1rem 1rem
+
+=mobile
+  .page-wrapper
+    padding: 5px
+
+
+
+.has-background-image
+  position: relative
+
+  .background-image
+    position: absolute
+    height: 100%
+    width: 100%
+    object-fit: cover
+    display: block
+
+  &-static
+    height: 100vh
+    width: 100vw
+    overflow: hidden
+
+
