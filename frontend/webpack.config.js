@@ -80,7 +80,7 @@ module.exports = {
 		}),
 		//new ExtractTextPlugin('css/styles.css'),
 		new MiniCssExtractPlugin({
-			filename: 'styles.[chunkhash].css',
+			filename: 'styles.css',
 			chunkFilename: '[id].css',
 		}),
 		new VueLoaderPlugin(),
