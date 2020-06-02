@@ -17,20 +17,20 @@
             </tr>
 
             <tr v-for="(item, index) in bills">
-                <td>{{parseInt(index) + index}}</td>
-                <td>{{item.time.toLocaleString()}}</td>
+                <td>{{parseInt(index)+1}}</td>
+                <td>{{item.date}}</td>
                 <td>{{item.price}}</td>
                 <td>
                     <div class="buttons">
-                        <router-link class="button is-link" :to="'/bill/' + index">Szczgóły</router-link>
-                        <button class="button is-danger" v-on:click="remove(index)">Usuń</button>
+                        <router-link class="button is-link" :to="'/bill/' + item.id">Szczgóły</router-link>
+                        <button class="button is-danger" v-on:click="remove(item.id)">Usuń</button>
                     </div>
                 </td>
             </tr>
 
         </table>
 
-        <button class="button is-link" v-on:click="add">Dodaj</button>
+        <button class="button is-link" v-on:click="add()">Dodaj</button>
 
     </div>
 
@@ -45,26 +45,54 @@
         components: {Message},
         data(){
             return {
-                bills: [{time:  new Date(), price: 123.48}]
+                bills: [{date:  new Date(), price: 123.48}]
             }
         },
 
         mounted() {
+            this.load()
         },
 
         methods: {
             load: function(){
-
+                let token = window.sessionStorage.getItem("token")
+                axios.post('/getBills', {
+                    token: token
+                }).then(m => {
+                    this.bills = m.data
+                }).catch(e => {
+                    console.error(e)
+                })
             },
 
             add: function () {
-
+                let token = window.sessionStorage.getItem("token")
+                axios.post('/createBill', {
+                    token: token,
+                }).then(m => {
+                    if(m.data.error){
+                        this.$refs.message.showDanger("", m.data.error)
+                    }else{
+                        this.$refs.message.showSuccess("", "Dodano rachunek")
+                        this.load()
+                    }
+                })
             },
 
             remove: function (index) {
                 if (confirm("Czy na pewno chcesz usunąć ten rachunek?")){
-                    console.log("")
-                    this.$refs.message.showSuccess("Usunięto rachunek")
+                    let token = window.sessionStorage.getItem("token")
+                    axios.post('/deleteBill', {
+                        token: token,
+                        id: index
+                    }).then(m => {
+                        if(m.data.error){
+                            this.$refs.message.showDanger("", m.data.error)
+                        }else{
+                            this.$refs.message.showSuccess("", "Usunięto rachunek")
+                            this.load()
+                        }
+                    })
                 }else{
                     this.$refs.message.showDanger("Nie udało się wykonać zadania")
                 }

@@ -6,26 +6,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 import com.resources.BillManagementSystem.*;
 
 
-@SpringBootApplication
+@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 public class BillManagementSystemApplication implements CommandLineRunner{
 
-	 @Autowired
-	 UserRepository userRepository;
+	
+	// @Autowired
+	 //UserRepository userRepository;
 	public static void main(String[] args) {
 		SpringApplication.run(BillManagementSystemApplication.class, args);
-		
-		System.out.println("Gitara siema");
 	}
 	
 	@Override
 	public void run(String... args) {
    
-		System.out.println("gitara, siema");
+		
         
+        /*
         List<User> user = userRepository.findAll();
         //user.forEach(System.out::println);
         
@@ -37,7 +38,7 @@ public class BillManagementSystemApplication implements CommandLineRunner{
             System.out.println(newUser.getValue());
         }
         
-        System.out.println("\n\n");
+        System.out.println("\n\n");*/
         
         
         

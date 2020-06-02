@@ -10,12 +10,12 @@ module.exports = {
 		index: './src/index.js',
 	},
 	output: {
-		path: path.resolve(__dirname, 'public'),
+		path: path.resolve(__dirname, '../BillManagementSystem/static'),
 		filename: '[name].js',
 		publicPath: ''
 	},
 	devServer: {
-		contentBase: path.join(__dirname, 'public'),
+		path: path.resolve(__dirname, '../BillManagementSystem/static'),
 		compress: true,
 		port: 9000
 	},
