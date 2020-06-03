@@ -28,11 +28,11 @@ CREATE TABLE `bill` (
   `image` blob,
   `price` float DEFAULT NULL,
   `description` varchar(999) NOT NULL,
-  `date` date NOT NULL,
+  `date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_key_user_idx` (`userId`),
   CONSTRAINT `FK_key_user` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `bill` (
 
 LOCK TABLES `bill` WRITE;
 /*!40000 ALTER TABLE `bill` DISABLE KEYS */;
-INSERT INTO `bill` VALUES (1,2,NULL,513,'Lalala','2020-05-20');
+INSERT INTO `bill` VALUES (1,2,NULL,513,'Lalala','2020-06-03 23:53:06'),(2,2,'',10,'New bill','2020-06-03 23:53:06'),(7,2,'',10,'New bill','2020-06-03 23:53:06'),(9,1,'',10,'New bill','2020-06-03 23:53:06'),(10,1,'',10,'New bill','2020-06-03 23:53:06'),(12,1,'',10,'New bill','2020-06-03 23:53:06'),(13,1,'',10,'New bill','2020-06-03 23:46:31'),(14,3,'',10,'New bill','2020-06-04 00:10:20'),(16,3,'',10,'New bill','2020-06-04 00:10:23'),(17,3,'',10,'New bill','2020-06-04 00:10:34');
 /*!40000 ALTER TABLE `bill` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -71,34 +71,8 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'N3shi','N3shi','ajaV6pSPh6VWKJUnvQhcUF3Yf4I50QVQ','Wojciech','518093180','neshiteam@gmail.com','2020-06-03 22:05:52'),(2,'test','test','xU0ztSMZCQCWQBLfay5TMY3csoLa1Nt8','test','test','test','2020-06-03 22:44:46'),(3,'t','t','Y9Qz4jTc-nd3Ldqx_xZwegOYnaxZkY31','t','35','t','2020-06-03 22:21:32');
+INSERT INTO `user` VALUES (1,'N3shi','N3shi','fBPlKYv6vVjpjbki73hdr8epe6hRaLyM','Wojciech','518093180','neshiteam@gmail.com','2020-06-03 23:36:38'),(2,'test','test','AZq_g_GtHpA5sT4d42z98z-zy_ntMNNR','test','test','test','2020-06-03 23:33:02'),(3,'t','t','laEFUzEMhT59k2BQo1TpuIb9N4GV3g-H','t','35','t','2020-06-04 00:00:42');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `users`
---
-
-DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(45) NOT NULL,
-  `age` varchar(45) NOT NULL,
-  `city` varchar(45) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Lama','20','Kraków'),(2,'Heheszki','26','Wrocław'),(3,'kamil brzezinski','31','LDZ');
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -110,4 +84,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-06-03 23:21:13
+-- Dump completed on 2020-06-04  0:14:34

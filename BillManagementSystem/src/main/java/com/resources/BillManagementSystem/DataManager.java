@@ -118,7 +118,6 @@ public class DataManager {
 	            completeJSON += temp;
 	        }
 	        completeJSON =  completeJSON.substring(0, completeJSON.length()-1);
-        System.out.println(completeJSON);
 		return completeJSON + "]";
 	}
 	

@@ -33,6 +33,21 @@ class BillForm {
     
 }
 
+class BillModifyForm {
+	public String token;
+	public int id;
+	public String param;
+	public String value;  
+}
+
+class CreateUser{
+	public String name;
+	public String password;
+	public String surname;
+	public String phone; 
+	public String email;
+}
+
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 public class IndexController {
@@ -87,6 +102,24 @@ public class IndexController {
 		return sendMessage("verify", verifyByToken(l));
 	}
 	
+	@PostMapping(value = "/createUser", headers="Content-Type=application/json")
+	@ResponseBody
+	public String createUser(@RequestBody CreateUser u){
+		
+			DataManager manager = new DataManager();
+			User user = userRepository.findOneByMail(u.email);
+			if(user != null) sendMessage("error", "Account with that e-mail exist");
+			
+			user = new User(u.name, u.password, manager.getNewToken(), manager.getActualDate(),u.surname,u.phone,u.email);
+			try {
+				userRepository.save(user);
+			}catch(Exception e)
+			{
+				return sendMessage("error", "Error creating account - please try again later"); //znaczy ze cos w bazie lub polaczenie z baza nie dziala
+			}
+			return "{}";
+	}
+	
 	@PostMapping(value = "/getBills", headers="Content-Type=application/json")
 	@ResponseBody
 	public String getBills(@RequestBody VerifyForm l){
@@ -111,11 +144,42 @@ public class IndexController {
 				System.out.println(e);
 				return sendMessage("error", "No logged user found");
 			}
-			
-			
+		
 		}
 		return "[]";
-
+	}
+	
+	@PostMapping(value = "/modifyBill", headers="Content-Type=application/json")
+	@ResponseBody
+	public String modifyBill(@RequestBody BillModifyForm l){
+		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
+		//poprawny token
+		//jezeli  wystapil blad to zwracamy {error: <opis>}
+		User user;
+		Bill bill;
+		try{
+			user = userRepository.findOneByToken(l.token);
+			 bill = user.getBillById(l.id);
+		}catch(Exception e) {
+			return sendMessage("error", "Cannot find bill");
+		}
+		
+		switch(l.param) {
+		case "price": bill.setPrice(Integer.parseInt(l.param));break;
+		case "desc":  bill.setDescription(l.param);break;
+		case "date":  bill.setDate(l.param);break;
+		case "photo": bill.setImage(l.param.getBytes()); break;
+		default: return sendMessage("error", "Unknown command");
+		}
+		
+		try {
+		billRepository.save(bill);
+		}catch(Exception e )
+		{
+			return sendMessage("error", "Cannot update bill");
+		}
+		//nie bylo bledu
+		return "{}";
 	}
 	
 	@PostMapping(value = "/deleteBill", headers="Content-Type=application/json")
@@ -123,13 +187,26 @@ public class IndexController {
 	public String deleteBill(@RequestBody BillForm l){
 		
 		
+		User user;
 		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
-		//poprawny token
-		//jezeli  wystapil blad to zwracamy {error: <opis>}
-		
-		
-		//nie bylo bledu
-		return "{}";
+				//poprawny token
+		try{
+			user = userRepository.findOneByToken(l.token);
+			Bill bill = user.getBillById(l.id);
+			
+			//jezeli  wystapil blad to zwracamy {error: <opis>}
+			if(bill == null) {
+				return sendMessage("error", "Bill not found");
+			}
+			
+			billRepository.delete(bill);
+			
+			//nie bylo bledu
+			return "{}";
+			
+		}catch(Exception e) {
+			return sendMessage("error", "No logged user found");
+		}	
 	}
 	
 	@PostMapping(value = "/getBill", headers="Content-Type=application/json")
@@ -171,12 +248,25 @@ public class IndexController {
 		
 		//tworzymy rachuenk z domyslnymi parametrami dla klienta o podanym tokenie. jesli wszystko pojdzie ok to
 		//zwracamy pusty obiekt a jesli nie to {error: <opis>}
-		
-		
-
-		
-		//nie bylo bledu
-		return "{}";
+		User user;
+		DataManager manager = new DataManager();
+		try{
+			user = userRepository.findOneByToken(l.token);
+			byte[] image = {};
+			Bill bill = new Bill(user,image,10,"New bill", manager.getActualDate());
+			
+			try{
+			billRepository.save(bill);
+			}catch(Exception e )
+			{
+				return sendMessage("error", "Cant create new bill");
+			}
+			
+			return "{}";
+			
+		}catch(Exception e) {
+			return sendMessage("error", "No logged user found");
+		}		
 	}
 	
 	
@@ -235,7 +325,7 @@ public class IndexController {
 	@ResponseBody
 	public String billCount(){
 		
-		return "{\"userCount\":\"" + billRepository.findAll().size() + "\"}";
+		return "{\"billCount\":\"" + billRepository.findAll().size() + "\"}";
 	}
 	
 	@PostMapping(value = "/billMax", headers="Content-Type=application/json")

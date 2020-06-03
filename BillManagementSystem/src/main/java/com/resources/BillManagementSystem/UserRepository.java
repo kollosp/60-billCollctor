@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	User findOneByToken(String token);
 	
+	User findOneByMail(String email);
+	
 	User findOneByUserId(int id);
 	
 	//sprawdzenie hasla
