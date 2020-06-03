@@ -21,7 +21,7 @@ public class Bill {
     
     //@ManyToOne(targetEntity = User.class)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="userId", referencedColumnName="userId")
+    @JoinColumn(name="userid", referencedColumnName="userId")
 	private User userId;
     
     @Column(name="image")
@@ -36,7 +36,7 @@ public class Bill {
     @Column(name="date")
 	private String date;
 	
-    
+    Bill(){};
 	
 	Bill(User userId, byte image[], int price, String description, String date)
 	{

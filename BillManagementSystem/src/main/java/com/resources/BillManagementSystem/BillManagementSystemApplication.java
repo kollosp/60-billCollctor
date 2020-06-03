@@ -1,6 +1,7 @@
 package com.resources.BillManagementSystem;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -15,8 +16,11 @@ import com.resources.BillManagementSystem.*;
 public class BillManagementSystemApplication implements CommandLineRunner{
 
 	
-	// @Autowired
-	 //UserRepository userRepository;
+	@Autowired
+	UserRepository userRepository;
+	
+	@Autowired
+	BillRepository billRepository;
 	public static void main(String[] args) {
 		SpringApplication.run(BillManagementSystemApplication.class, args);
 	}
@@ -24,53 +28,41 @@ public class BillManagementSystemApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) {
    
+		//funkcja pozwala testowac serwer w konsoli
+        
+		User user23 = userRepository.findOneByName("N3shi");
+		System.out.println(user23.getValue());
 		
-        
-        /*
-        List<User> user = userRepository.findAll();
-        //user.forEach(System.out::println);
-        
-        int i = 0;
-        for(@SuppressWarnings("unused") Object o : user)
+		User user24 = userRepository.findOneByUserId(2);
+		System.out.println(user24.getValue());
+		
+		
+		
+		/*List<Bill> bill = billRepository.findByUserId(user23);
+		billRepository.find();
+		int i = 0;
+		System.out.println(bill.size());
+        for(@SuppressWarnings("unused") Object o : bill)
         {
-        	User newUser  = user.get(i);
+        	Bill newBill  = bill.get(i);
         	i++;
-            System.out.println(newUser.getValue());
-        }
-        
-        System.out.println("\n\n");*/
-        
-        
-        
-
-        //User someUser = getUser();
-
-        //userRepository.save(someUser);
-
-        //List<User> users2 = userRepository.findAll();
-        //users2.forEach(System.out::println);
-
-       /* List<User> foundUsers = userRepository.findByUsername("kamil brzezinski");
-        foundUsers.forEach(System.out::println);
-
-        System.out.println();
-
-        List<User> foundUsers2 = userRepository.findByUsernameContaining("kam");
-        foundUsers2.forEach(System.out::println);
-
-        System.out.println();
-
-        List<User> foundUsers3 = userRepository.findByAgeGreaterThan(25);
-        foundUsers3.forEach(System.out::println);
-
-        System.out).println();
-
-        List<String> cities = new ArrayList<>();
-        cities.add("KrakĂłw");
-        cities.add("Kielce");
-        List<User> foundUsers4 = userRepository.findByCityIn(cities);
-        foundUsers4.forEach(System.out::println);
-       */ 
+        	System.out.println(newBill.getDescription());
+        }*/
+		
+		//user23.setToken("N3shi");
+		//user23.setTokenExpireDate("2020-03-20 12:20:21");
+		//userRepository.save(user23);
+		
+		/*try {
+			User user234 = userRepository.findOneByName("N3shii");
+			System.out.println(user234.getValue());
+		}catch(Exception e)
+		{
+			System.out.println("Nie ma takiego uzytkownika");
+		}*/
+	
+		
+     
     }
 
 }

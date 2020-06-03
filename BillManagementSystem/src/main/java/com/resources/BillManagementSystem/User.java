@@ -36,7 +36,7 @@ public class User {
     private String mail;
 	
 	@OneToMany(mappedBy="userId", fetch = FetchType.LAZY)
-	private Set<Bill> bill = new HashSet<Bill>(0);
+	private Set<Bill> bills = new HashSet<Bill>(0);
 	
 	User(){};
 	
@@ -144,8 +144,42 @@ public class User {
 	public void setMail(String mail) {
 		this.mail = mail;
 	}
+	
+	public Bill getBillById(int id)
+	{
+		Object[] a = bills.toArray();
+		
+		for(Object o: a)
+		{
+			Bill b = (Bill)o;
+			if(b.getId() == id)
+			{
+				return b;
+			}
+		}
+		
+		return null;
+	}
+	
+	public float countBillsPrice()
+	{
+		float sum =0 ;
+		
+		Object[] a = bills.toArray();
+		
+		for(Object o: a)
+		{
+			Bill b = (Bill)o;
+			sum += b.getPrice();
+		}
+		
+		return sum;
+	}
 
-
+	public Set<Bill> getBills()
+	{
+		return bills;
+	}
     public String getValue()
     {
     	String temp = "Id = " + userId + "    Login: " + name + "    pass:" + passw;

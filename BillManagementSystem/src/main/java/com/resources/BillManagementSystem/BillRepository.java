@@ -8,9 +8,12 @@ import java.util.List;
 
 @Repository
 public interface BillRepository extends JpaRepository<Bill, Long> {
-    //List<User> findByUsername(String username);
-    //List<User> findByUsernameContaining(String username);
-    //List<User> findByAgeGreaterThan(int age);
-    //List<User> findByCityIn(Collection<String> cities);
+
+	Bill findOneByIdAndUserId(int id, int userId);
+	
+	List<Bill> findByUserId(long userId);
+	//List<Bill> findAllByUserId(int userId);
+
+	
 }
 

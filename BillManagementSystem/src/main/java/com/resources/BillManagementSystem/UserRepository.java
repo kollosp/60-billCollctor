@@ -8,9 +8,26 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    //List<User> findByUsername(String username);
-    //List<User> findByUsernameContaining(String username);
-    //List<User> findByAgeGreaterThan(int age);
-    //List<User> findByCityIn(Collection<String> cities);
+
+	//sprawdzenie loginu
+	List<User> findByName(String username);
+	
+	User findOneByName(String username);
+	
+	User findOneByToken(String token);
+	
+	User findOneByUserId(int id);
+	
+	//sprawdzenie hasla
+	List<User> findByPassw(String password);
+	
+	//sprawdzenie sprawdzenie tokenu
+	List<User> findByToken(String token);
+	
+	//sprawdzenie telefonu
+	List<User> findByPhone(String phone);
+	
+
+	
 }
 
