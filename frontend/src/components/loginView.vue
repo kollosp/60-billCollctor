@@ -42,8 +42,13 @@
                                             </button>
                                         </div>
                                         <div class="control">
-                                            <router-link to="/pwdreset" class="button is-link">
-                                                Zresetuj hasło
+                                            <router-link to="/register" class="button is-link">
+                                                Zarejestruj się
+                                            </router-link>
+                                        </div>
+                                        <div class="control">
+                                            <router-link to="/statistics" class="button is-link">
+                                                Statystyki
                                             </router-link>
                                         </div>
                                     </div>

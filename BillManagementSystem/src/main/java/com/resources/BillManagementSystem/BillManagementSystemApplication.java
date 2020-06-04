@@ -30,11 +30,11 @@ public class BillManagementSystemApplication implements CommandLineRunner{
    
 		//funkcja pozwala testowac serwer w konsoli
         
-		User user23 = userRepository.findOneByName("N3shi");
-		System.out.println(user23.getValue());
+		//User user23 = userRepository.findOneByName("N3shi");
+		//System.out.println(user23.getValue());
 		
-		User user24 = userRepository.findOneByUserId(2);
-		System.out.println(user24.getValue());
+		//User user24 = userRepository.findOneByUserId(2);
+		//System.out.println(user24.getValue());
 		
 		
 		

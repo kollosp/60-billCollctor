@@ -95,7 +95,7 @@ public class DataManager {
 	public String getBillStringJson(String id, String date, String price, String descr)
 	{
 		String command = "{\"id\":\"" + id + "\",\"date\":\"" + date + "\", "
-				+ "\"price\":\"" + price+ "\", \"desc\":\"" + descr+ "\"}";;
+				+ "\"price\":\"" + price+ "\", \"desc\":\"" + descr+ "\",\"photo\":\"\"}";
 		
 		return command;
 	}

@@ -40,7 +40,7 @@ class BillModifyForm {
 	public String value;  
 }
 
-class CreateUser{
+class CreateUserForm{
 	public String name;
 	public String password;
 	public String surname;
@@ -65,13 +65,9 @@ public class IndexController {
 	public String login(@RequestBody LoginForm l) throws ParseException{
 		
 		
-		//sprawdzenie czy jest user o takim nickname
-		User user = userRepository.findOneByName(l.username);
-		try {
-			if(user.getName() == l.username);
-	
-		}catch(Exception e)
-		{
+		//sprawdzenie czy jest user o takim emailu
+		User user = userRepository.findOneByMail(l.username);
+		if(user == null) {
 			return sendMessage("error", "Incorrect username");
 		}
 		
@@ -102,13 +98,15 @@ public class IndexController {
 		return sendMessage("verify", verifyByToken(l));
 	}
 	
-	@PostMapping(value = "/createUser", headers="Content-Type=application/json")
+	@PostMapping(value = "/register", headers="Content-Type=application/json")
 	@ResponseBody
-	public String createUser(@RequestBody CreateUser u){
+	public String createUser(@RequestBody CreateUserForm u){
 		
 			DataManager manager = new DataManager();
 			User user = userRepository.findOneByMail(u.email);
-			if(user != null) sendMessage("error", "Account with that e-mail exist");
+			if(user != null) {
+				return sendMessage("error", "Account with that e-mail exist");
+			}
 			
 			user = new User(u.name, u.password, manager.getNewToken(), manager.getActualDate(),u.surname,u.phone,u.email);
 			try {
@@ -165,10 +163,10 @@ public class IndexController {
 		}
 		
 		switch(l.param) {
-		case "price": bill.setPrice(Integer.parseInt(l.param));break;
-		case "desc":  bill.setDescription(l.param);break;
-		case "date":  bill.setDate(l.param);break;
-		case "photo": bill.setImage(l.param.getBytes()); break;
+		case "price": bill.setPrice(Integer.parseInt(l.value));break;
+		case "desc":  bill.setDescription(l.value);break;
+		case "date":  bill.setDate(l.value);break;
+		case "photo": bill.setImage(l.value.getBytes()); break;
 		default: return sendMessage("error", "Unknown command");
 		}
 		

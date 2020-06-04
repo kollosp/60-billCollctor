@@ -15,7 +15,7 @@
                 <th>Kwota</th>
                 <th>Akcje</th>
             </tr>
-
+            <h1 v-if="bills.length == 0">Nie został dodany jeszcze zaden rachunek!</h1>
             <tr v-for="(item, index) in bills">
                 <td>{{parseInt(index)+1}}</td>
                 <td>{{item.date}}</td>
@@ -45,7 +45,7 @@
         components: {Message},
         data(){
             return {
-                bills: [{date:  new Date(), price: 123.48}]
+                bills: []
             }
         },
 
