@@ -97,24 +97,40 @@
             },
 
             save: function() {
+                let self = this
                 let error = ""
-                for(let k in this.billDataModel){
-                    if(this.billDataModel[k] != this.billData[k]) {
+                let keys = Object.keys(self.billDataModel);
+                const saveNext = function(index, callback) {
 
-                        this.saveOne(k, this.billDataModel[k]).
-                        then().
-                        catch(e => {
-                            error += "Blad przy modyfikacji " + k + "parametru: " + e + "<br>"
-                            this.$refs.message.showDanger("", error)
-                        })
+                    console.log("saveNext", index)
+                    if(index >= keys.length) {
+                        callback()
+                        return
+                    }
+                    else{
+                        if(self.billDataModel[keys[index]] != self.billData[keys[index]]) {
+                            self.saveOne(keys[index], self.billDataModel[keys[index]]).
+                            then(m => {
+                                saveNext(index+1, callback)
+                            }).
+                            catch(e => {
+                                error += "Blad przy modyfikacji " + keys[index] + "parametru: " + e + "<br>"
+                                index ++
+                                saveNext(index+1,callback)
+                            })
+                        }else{
+                            saveNext(index+1,callback)
+                        }
                     }
                 }
 
-                if(error != ""){
-                    this.$refs.message.showDanger("", error)
-                }else{
-                    this.$refs.message.showSuccess("", "Poprawnie zmodyfikowano")
-                }
+                saveNext(0, function() {
+                    if(error != ""){
+                        self.$refs.message.showDanger("", error)
+                    }else{
+                        self.$refs.message.showSuccess("", "Poprawnie zmodyfikowano")
+                    }
+                })
             },
 
             saveOne: function(paramName, paramValue){
@@ -129,9 +145,9 @@
                         value: paramValue
                     }).then(m => {
                         if(m.data.error){
-                            this.$refs.message.showDanger("", m.data.error)
+                            reject(m.data.error)
                         }else{
-                            this.$refs.message.showSuccess("", "Poprawnie zmodyfikowano " + paramName)
+                            resolve(paramName)
                         }
                     }).catch(e => {
                         console.error(e)
