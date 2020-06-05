@@ -1,5 +1,6 @@
 package com.resources.BillManagementSystem;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +13,8 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
 	Bill findOneByIdAndUserId(int id, int userId);
 	
 	List<Bill> findByUserId(long userId);
+	
+	List<Bill> findByUserId(User user, Sort sort);
 	//List<Bill> findAllByUserId(int userId);
 
 	

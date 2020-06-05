@@ -1,13 +1,17 @@
 package com.resources.BillManagementSystem;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import com.resources.BillManagementSystem.*;
 
@@ -28,25 +32,63 @@ public class BillManagementSystemApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) {
    
+		/*
+		String t1,t2;
+		t1 = "test";
+		t2 = "test";
+		
+		String pass = BCrypt.hashpw(t2, BCrypt.gensalt());
+		
+		DataManager data = new DataManager();
+		
+		System.out.println(data.test2(pass, t1));*/
+		
+		//User user = userRepository.findOneByName("a");
+		//User user = userRepository.findOneByToken(l.token,Sort.by(sortBy).ascending());
+		//User user = userRepository.findOneByUserId(9);
+		//System.out.println(user.getValue());
+		
+		//Set<Bill> bills = user.getBills();
+		//System.out.println(bills.size());
+		//Object o = bills.toArray();
+		//List<Object> newBills = Arrays.asList(bills.toArray());
+		
+
+		//DataManager manager = new DataManager();
+		//manager.sortBills(bills, "price");
+		
 		//funkcja pozwala testowac serwer w konsoli
         
-		//User user23 = userRepository.findOneByName("N3shi");
+		//User user23 = userRepository.findOneByName("a");
 		//System.out.println(user23.getValue());
 		
 		//User user24 = userRepository.findOneByUserId(2);
 		//System.out.println(user24.getValue());
 		
+		/*User user = userRepository.findOneById(12);
 		
+				List<Bill> bill = billRepository.findByUserId(user.getUserId());
+				
+					for(Object o : bill)
+					{
+						Bill b = (Bill) o;
+						billRepository.delete(b);
+					}
+				
+			
+					userRepository.delete(user);
+		*/
+				
 		
-		/*List<Bill> bill = billRepository.findByUserId(user23);
-		billRepository.find();
+		//List<Bill> bill = billRepository.findByUserId(user23);
+		/*List<Bill> bills = billRepository.findByUserId(user23,Sort.by("price")); 
 		int i = 0;
-		System.out.println(bill.size());
-        for(@SuppressWarnings("unused") Object o : bill)
+		System.out.println(bills.size());
+        for(@SuppressWarnings("unused") Object o : bills)
         {
-        	Bill newBill  = bill.get(i);
+        	Bill newBill  = bills.get(i);
         	i++;
-        	System.out.println(newBill.getDescription());
+        	System.out.println(newBill.getPrice());
         }*/
 		
 		//user23.setToken("N3shi");

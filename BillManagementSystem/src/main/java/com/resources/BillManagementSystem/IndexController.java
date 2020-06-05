@@ -1,10 +1,14 @@
 package com.resources.BillManagementSystem;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +52,21 @@ class CreateUserForm{
 	public String email;
 }
 
+class GetBills{
+	public String token;
+	public String offset; //przesuniecie (liczysz od 1, czyli jak ktos chce wyswietlic 11-20, to wysylasz 11-20, choc w tablicy to jest 10-19)
+	public String count; //ile pobrac 
+	public String sortBy; // price, date
+	public String sortMode; // ascending, descending
+}
+
+class AdminMode{
+	public String token;
+	public String userId;
+	public String userRole;
+}
+
+
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 public class IndexController {
@@ -60,6 +79,10 @@ public class IndexController {
 	
 	DataManager manager = new DataManager();
 	
+	//**************
+	//    USER
+	//**************
+	
 	@PostMapping(value = "/login", headers="Content-Type=application/json")
 	@ResponseBody
 	public String login(@RequestBody LoginForm l) throws ParseException{
@@ -71,16 +94,13 @@ public class IndexController {
 			return sendMessage("error", "Incorrect username");
 		}
 		
+		System.out.println("pass:"+ manager.test2(user.getPassw(),l.password));
+		
+		
 		//sprawdzenie hasla
-		if(!l.password.equals(user.getPassw()))
+		if(manager.test2(user.getPassw(),l.password) == false)
 			return sendMessage("error", "Incorrect password");
 		
-		//sprawdzenie czy user nie jest juz zalogowany
-		/*if(manager.checkIfLogged(user) == "logged") 
-		{
-		System.out.println("wyjatek");
-		return sendMessage("error","User already connected");
-		}*/
 		
 		user.setToken(manager.getNewToken());
 		user.setTokenExpireDate(manager.newExpireDate());
@@ -107,8 +127,10 @@ public class IndexController {
 			if(user != null) {
 				return sendMessage("error", "Account with that e-mail exist");
 			}
-			
-			user = new User(u.name, u.password, manager.getNewToken(), manager.getActualDate(),u.surname,u.phone,u.email);
+			String pass = BCrypt.hashpw(u.password, BCrypt.gensalt());
+			user = new User(u.name, pass, manager.getNewToken(), manager.getActualDate(),u.surname,u.phone,u.email);
+			System.out.println(pass);
+			System.out.println(";" + u.password + ";");
 			try {
 				userRepository.save(user);
 			}catch(Exception e)
@@ -118,6 +140,176 @@ public class IndexController {
 			return "{}";
 	}
 	
+	
+	@PostMapping("/logout")
+	@ResponseBody
+	public String logout(@RequestBody VerifyForm l){
+		
+		DataManager manager = new DataManager();
+		User user = userRepository.findOneByToken(l.token);
+		try {
+			if(user.getToken() == l.token);
+			user.setTokenExpireDate(manager.logout());
+			userRepository.save(user);
+			return sendMessage("verify", "ok");
+		}catch(Exception e)
+		{
+			return sendMessage("verify", "bad");
+		}
+		//wylogowanie klienta po tokenie
+	}
+	
+	
+	@PostMapping("/addUserRole")
+	@ResponseBody
+	public String addUserRole(@RequestBody AdminMode a){
+		
+		DataManager manager = new DataManager();
+		User user = userRepository.findOneByToken(a.token);
+		try {
+			if(user.getToken() == a.token);
+			{
+				if(user.getRole().equals("admin"))
+				{
+				user = userRepository.findOneByUserId(Integer.parseInt(a.userId));
+				user.setRole(a.userRole);
+				userRepository.save(user);
+				return sendMessage("status", "user role changed");
+				}
+				else return sendMessage("error","no privileges");
+			}
+			
+		}catch(Exception e)
+		{
+			return sendMessage("error", "disconected");
+		}
+	}
+	
+	
+	@PostMapping("/getUsers")
+	@ResponseBody
+	public String getUsers(@RequestBody VerifyForm l){
+		
+		DataManager manager = new DataManager();
+		List<User> user = userRepository.findAll();
+		if (user.size() != 0)
+		{
+			return manager.getUsersStringJson(user);
+		}
+		else return "[]";
+	}
+	
+	@PostMapping("/deleteUserByAdmin")
+	@ResponseBody
+	public String deleteUserByAdmin(@RequestBody AdminMode a){
+		
+		DataManager manager = new DataManager();
+		User user = userRepository.findOneByToken(a.token);
+		try {
+			if(user.getToken() == a.token);
+			{
+				if(user.getRole().equals("admin"))
+				{
+				
+				user = userRepository.findOneByUserId(Integer.parseInt(a.userId)); //nowy user (wskazuje na niego admin)
+				List<Bill> bill = billRepository.findByUserId(user.getUserId());   //lista paragonow
+				
+				
+				//usuwanie paragonow
+				try {
+					for(Object o : bill)
+					{
+						Bill b = (Bill) o;
+						billRepository.delete(b);
+					}
+				}catch(Exception e)
+				{
+					return sendMessage("error", "Cant delete bills");
+				}
+				
+				//usuwanie usera
+				try {
+					userRepository.delete(user);
+				}catch(Exception e)
+				{
+					return sendMessage("error", "Cant delete user");
+				}
+				userRepository.delete(user);
+				return "{}";
+				}
+				else return sendMessage("error","no privileges");
+			}	
+		}catch(Exception e)
+		{
+			return sendMessage("error", "disconected");
+		}
+	}
+	
+	@PostMapping("/deleteUser")
+	@ResponseBody
+	public String deleteUser(@RequestBody VerifyForm a){
+	
+		User user = userRepository.findOneByToken(a.token);
+		try {
+			if(user.getToken() == a.token)
+			{
+				List<Bill> bill = billRepository.findByUserId(user.getUserId());
+				
+				try {
+					for(Object o : bill)
+					{
+						Bill b = (Bill) o;
+						billRepository.delete(b);
+					}
+				}catch(Exception e)
+				{
+					return sendMessage("error", "Cant delete bills");
+				}
+				
+				try {
+					userRepository.delete(user);
+				}catch(Exception e)
+				{
+					return sendMessage("error", "Cant delete user");
+				}
+				
+				return "{}";
+			}	
+			else return sendMessage("error", "Disconected");
+		}catch(Exception e)
+		{
+			return sendMessage("error", "No user found");
+		}
+	}
+	
+	
+	//*************************
+	//        BILLS
+	//*************************
+	
+	@PostMapping(value = "/getBillCount", headers="Content-Type=application/json")
+	@ResponseBody
+	public String getBillCount(@RequestBody VerifyForm l){
+		
+		String temp = verifyByToken(l);
+		System.out.println(temp);
+		if(verifyByToken(l).equals("ok"))
+		{
+			//pobierz liste wszystkie paragony
+			User user = userRepository.findOneByToken(l.token);
+			try {
+				Set<Bill> bills = user.getBills();
+				return sendMessage("count",String.valueOf(bills.size()));
+			}catch(Exception e)
+			{
+				System.out.println(e);
+				return sendMessage("error", "No logged user found");
+			}
+		}
+		return "[]";
+	}
+	
+	/*
 	@PostMapping(value = "/getBills", headers="Content-Type=application/json")
 	@ResponseBody
 	public String getBills(@RequestBody VerifyForm l){
@@ -128,15 +320,56 @@ public class IndexController {
 		{
 			//pobierz liste wszystkie paragony
 			User user = userRepository.findOneByToken(l.token);
+			//User user = userRepository.findOneByToken(l.token,Sort.by(sortBy).ascending());
 			try {
 				Set<Bill> bills = user.getBills();
 				if(bills.size() > 0)
 				{
-					DataManager manager = new DataManager();
-					
-					return manager.getBillsStringJson(bills.toArray());
+				DataManager manager = new DataManager();
+				manager.sortBills(bills, sortBy);
+				return manager.getBillsStringJson(bills.toArray());
+				} 
+			}catch(Exception e)
+			{
+				System.out.println(e);
+				return sendMessage("error", "No logged user found");
+			}
+		}
+		return "[]";
+	}*/
+	
+	@PostMapping(value = "/getBills", headers="Content-Type=application/json")
+	@ResponseBody
+	public String getBills(@RequestBody GetBills l){
+		
+		//String temp = verifyByToken(l);
+		//System.out.println(temp);
+		if(verifyByTokenString(l.token).equals("ok"))
+		{
+			User user = userRepository.findOneByToken(l.token);
+			try {
+				List<Bill> bills; 
+				switch(l.sortMode) {
+				case "ascending": bills = billRepository.findByUserId(user,Sort.by(l.sortBy).ascending()); break;
+				case "descending":  bills = billRepository.findByUserId(user,Sort.by(l.sortBy).descending()); break;
+				default: return sendMessage("error", "Unknown command");
 				}
-
+				if(bills.size() > 0)
+				{
+				DataManager manager = new DataManager();
+				
+				int offset, count;
+				offset = Integer.parseInt(l.offset);
+				count = Integer.parseInt(l.count);
+		
+				List<Bill> newBills = new ArrayList<>();
+				for(int i = offset -1; i < offset-1 + count; i++ )
+				{
+					if(i == bills.size())break; //zabezpieczenie zeby nie bylo ze pobierasz 1-10 a sa tylko 2 rekordy
+					newBills.add(bills.get(i));
+				}	
+				return manager.getBillsStringJson(newBills.toArray());
+				} 
 			}catch(Exception e)
 			{
 				System.out.println(e);
@@ -147,66 +380,7 @@ public class IndexController {
 		return "[]";
 	}
 	
-	@PostMapping(value = "/modifyBill", headers="Content-Type=application/json")
-	@ResponseBody
-	public String modifyBill(@RequestBody BillModifyForm l){
-		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
-		//poprawny token
-		//jezeli  wystapil blad to zwracamy {error: <opis>}
-		User user;
-		Bill bill;
-		try{
-			user = userRepository.findOneByToken(l.token);
-			 bill = user.getBillById(l.id);
-		}catch(Exception e) {
-			return sendMessage("error", "Cannot find bill");
-		}
-		
-		switch(l.param) {
-		case "price": bill.setPrice(Integer.parseInt(l.value));break;
-		case "desc":  bill.setDescription(l.value);break;
-		case "date":  bill.setDate(l.value);break;
-		case "photo": bill.setImage(l.value.getBytes()); break;
-		default: return sendMessage("error", "Unknown command");
-		}
-		
-		try {
-		billRepository.save(bill);
-		}catch(Exception e )
-		{
-			return sendMessage("error", "Cannot update bill");
-		}
-		//nie bylo bledu
-		return "{}";
-	}
-	
-	@PostMapping(value = "/deleteBill", headers="Content-Type=application/json")
-	@ResponseBody
-	public String deleteBill(@RequestBody BillForm l){
-		
-		
-		User user;
-		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
-				//poprawny token
-		try{
-			user = userRepository.findOneByToken(l.token);
-			Bill bill = user.getBillById(l.id);
-			
-			//jezeli  wystapil blad to zwracamy {error: <opis>}
-			if(bill == null) {
-				return sendMessage("error", "Bill not found");
-			}
-			
-			billRepository.delete(bill);
-			
-			//nie bylo bledu
-			return "{}";
-			
-		}catch(Exception e) {
-			return sendMessage("error", "No logged user found");
-		}	
-	}
-	
+
 	@PostMapping(value = "/getBill", headers="Content-Type=application/json")
 	@ResponseBody
 	public String getBill(@RequestBody BillForm l){
@@ -226,12 +400,14 @@ public class IndexController {
 				return "{}";
 			}
 			
-			String t1,t2,t3,t4;
+			String t1,t2,t3,t4,t5;
 			t1 = String.valueOf(bill.getId());
 			t2 = bill.getDate();
 			t3 = String.valueOf(bill.getPrice());
 			t4 = bill.getDescription();
-			String message = manager.getBillStringJson(t1,t2,t3,t4);
+			t5 = new String(bill.getImage());
+			
+			String message = manager.getBillStringJson(t1,t2,t3,t4,t5);
 			//nie bylo bledu
 			return message;
 			
@@ -267,25 +443,73 @@ public class IndexController {
 		}		
 	}
 	
-	
-	@PostMapping("/logout")
+	@PostMapping(value = "/modifyBill", headers="Content-Type=application/json")
 	@ResponseBody
-	public String logout(@RequestBody VerifyForm l){
-		
-		DataManager manager = new DataManager();
-		User user = userRepository.findOneByToken(l.token);
-		try {
-			if(user.getToken() == l.token);
-			user.setTokenExpireDate(manager.logout());
-			userRepository.save(user);
-			return sendMessage("verify", "ok");
-		}catch(Exception e)
-		{
-			return sendMessage("verify", "bad");
+	public String modifyBill(@RequestBody BillModifyForm l){
+		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
+		//poprawny token
+		//jezeli  wystapil blad to zwracamy {error: <opis>}
+		User user;
+		Bill bill;
+		try{
+			user = userRepository.findOneByToken(l.token);
+			 bill = user.getBillById(l.id);
+		}catch(Exception e) {
+			return sendMessage("error", "Cannot find bill");
 		}
-		//wylogowanie klienta po tokenie
+		
+		switch(l.param) {
+		case "price": bill.setPrice(Float.parseFloat(l.value));break;
+		case "desc":  bill.setDescription(l.value);break;
+		case "date":  bill.setDate(l.value);break;
+		case "photo": bill.setImage(l.value.getBytes()); break;
+		default: return sendMessage("error", "Unknown command");
+		}
+		
+		try {
+		billRepository.save(bill);
+		}catch(Exception e )
+		{
+			return sendMessage("error", "Cannot update bill");
+		}
+		//nie bylo bledu
+		return "{}";
 	}
 	
+	
+	@PostMapping(value = "/deleteBill", headers="Content-Type=application/json")
+	@ResponseBody
+	public String deleteBill(@RequestBody BillForm l){
+		
+		
+		User user;
+		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
+				//poprawny token
+		try{
+			user = userRepository.findOneByToken(l.token);
+			Bill bill = user.getBillById(l.id);
+			
+			//jezeli  wystapil blad to zwracamy {error: <opis>}
+			if(bill == null) {
+				return sendMessage("error", "Bill not found");
+			}
+			
+			billRepository.delete(bill);
+			
+			//nie bylo bledu
+			return "{}";
+			
+		}catch(Exception e) {
+			return sendMessage("error", "No logged user found");
+		}	
+	}
+	
+	
+	
+	//************
+	// JSON CREATOR
+	//************
+
 	public String sendMessage(String name, String value)
 	{
 		String message = "{\"" + name + "\":\"" + value + "\"}";
@@ -303,6 +527,23 @@ public class IndexController {
 			return "bad";
 		}
 	}
+	
+	public String verifyByTokenString(String token)
+	{
+		User user = userRepository.findOneByToken(token);
+		try {
+			if(user.getToken() == token);
+			return "ok";
+		}catch(Exception e)
+		{
+			return "bad";
+		}
+	}
+	
+	
+	//***************
+	// STATISTIC METHOD
+	//**************
 	
 	@PostMapping(value = "/userCount", headers="Content-Type=application/json")
 	@ResponseBody

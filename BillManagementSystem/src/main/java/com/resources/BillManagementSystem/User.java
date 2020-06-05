@@ -34,6 +34,9 @@ public class User {
     
     @Column(name="email")
     private String mail;
+    
+    @Column(name="role")
+    private String role;
 	
 	@OneToMany(mappedBy="userId", fetch = FetchType.LAZY)
 	private Set<Bill> bills = new HashSet<Bill>(0);
@@ -144,6 +147,17 @@ public class User {
 	public void setMail(String mail) {
 		this.mail = mail;
 	}
+	
+	
+	
+	public String getRole() {
+		return role;
+	}
+	public void setRole(String role) {
+		this.role = role;
+	}
+	
+	
 	
 	public Bill getBillById(int id)
 	{

@@ -28,7 +28,7 @@ public class Bill {
 	private byte image[];
     
     @Column(name="price")
-	private int price;
+	private float price;
     
     @Column(name="description")
 	private String description;
@@ -79,12 +79,12 @@ public class Bill {
 	}
 
 
-	public int getPrice() {
+	public float getPrice() {
 		return price;
 	}
 
 
-	public void setPrice(int price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
 

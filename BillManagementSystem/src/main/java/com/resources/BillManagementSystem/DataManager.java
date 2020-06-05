@@ -1,15 +1,21 @@
 package com.resources.BillManagementSystem;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime; // Import the LocalDateTime class
 import java.time.format.DateTimeFormatter; // Import the DateTimeFormatter class
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
 
 
 public class DataManager {
@@ -92,10 +98,10 @@ public class DataManager {
 		return formattedDate;
 	}
 	
-	public String getBillStringJson(String id, String date, String price, String descr)
+	public String getBillStringJson(String id, String date, String price, String descr, String photo)
 	{
 		String command = "{\"id\":\"" + id + "\",\"date\":\"" + date + "\", "
-				+ "\"price\":\"" + price+ "\", \"desc\":\"" + descr+ "\",\"photo\":\"\"}";
+				+ "\"price\":\"" + price+ "\", \"desc\":\"" + descr+ "\",\"photo\":\"" + photo + "\"}";
 		
 		return command;
 	}
@@ -113,7 +119,8 @@ public class DataManager {
 	        	t2 = newBill.getDate();
 	        	
 	        	t3 = String.valueOf(newBill.getPrice());
-	            String temp = getTempJson(t1,t2,t3);
+	     
+	            String temp = getTempJsonBills(t1,t2,t3);
 	            
 	            completeJSON += temp;
 	        }
@@ -121,7 +128,7 @@ public class DataManager {
 		return completeJSON + "]";
 	}
 	
-	public String getTempJson(String id, String date, String price )
+	public String getTempJsonBills(String id, String date, String price )
 	{
 		String command = "{\"id\":\"" + id + "\",\"date\":\"" + date + "\", "
 				+ "\"price\":\"" + price+ "\"},";;
@@ -129,6 +136,91 @@ public class DataManager {
 				return command;
 	}
 	
+	public String getUsersStringJson(List<User> user)
+	{
+		String completeJSON = "[";
+		for(Object o : user)
+		{
+			User tempUser = (User) o;
+			String t1,t2,t3,t4,t5;
+			t1 = String.valueOf(tempUser.getUserId());
+			t2 = tempUser.getMail();
+			t3 = tempUser.getName();
+			t4 = tempUser.getSurname();
+			t5 = tempUser.getPhone();
+			
+			String temp  = getTempJsonUser(t1,t2,t3,t4,t5);
+			completeJSON += temp;
+		}
+		 completeJSON =  completeJSON.substring(0, completeJSON.length()-1);
+		return completeJSON + "]";
+	}
 	
+	public String getTempJsonUser(String id, String email, String name, String sourname, String phone )
+	{
+		String command = "{\"id\":\"" + id + "\",\"email\":\"" + email + "\", "
+				+ "\"name\":\"" + name+ "\",\"sourname\":\"" + sourname + "\",\"phone\":\"" + phone + "\"},";
+				
+				return command;
+	}
+	
+	public Boolean test(User user,String text)
+	{
+		// Hash a password for the first time
+		
+		// gensalt's log_rounds parameter determines the complexity
+		// the work factor is 2**log_rounds, and the default is 10
+		//String hashed = BCrypt.hashpw(user.getPassw(), BCrypt.gensalt(12));
 
+		// Check that an unencrypted password matches one that has
+		// previously been hashed
+		System.out.println("'"+text + "'" + user.getPassw()+"'");
+		if (BCrypt.checkpw(text, user.getPassw()))
+			return true;
+		else
+			return false;
+	}
+	
+	public Boolean test2(String text1,String text)
+	{
+
+		System.out.println(text + text1);
+		if (BCrypt.checkpw(text, text1))
+			return true;
+		else
+			return false;
+	}
+
+	public void sortBills(Set<Bill> bills, String sortBy) {
+		
+		//List<Bill> newbills = convertToList(bills);
+		List<Object> newbills = Arrays.asList(bills.toArray());
+		//List<Bill> newbills = new ArrayList<>(bills);
+		
+		Comparator<Object> compareByPrice = (Object o1, Object o2) -> Float.compare(((Bill) o1).getPrice(), ((Bill) o1).getPrice()); 
+		newbills.sort(compareByPrice);
+		
+		//int i = 0;
+		for(int i =0; i<newbills.size(); i++)
+		{
+			Bill tempBill = (Bill) newbills.get(i);
+			System.out.println(tempBill.getPrice());
+		}
+	}
+	
+	// Generic function to convert set to list
+	public static <T> List<T> convertToList(Set<T> set)
+	{
+		// create an empty list
+		List<T> items = new ArrayList<>();
+
+		// push each element in the set into the list
+		for (T e : set)
+			items.add(e);
+
+		// return the list
+		return items;
+	}
+	
+	
 }

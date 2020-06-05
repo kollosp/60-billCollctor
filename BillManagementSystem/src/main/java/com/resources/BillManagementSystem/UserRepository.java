@@ -1,5 +1,6 @@
 package com.resources.BillManagementSystem;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	User findOneByName(String username);
 	
 	User findOneByToken(String token);
+	
+	User findOneByToken(String token,Sort sort);
 	
 	User findOneByMail(String email);
 	
