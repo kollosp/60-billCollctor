@@ -108,14 +108,14 @@ public class IndexController {
 		System.out.println(user.getToken() + user.getTokenExpireDate());
 		userRepository.save(user);
 		//funkcja przypisujaca token
-		return sendMessage("token",user.getToken());
+		return sendMessage("token",user.getToken(), "admin", user.getRole().equals("admin") ? "ok" : "bad");
 	}
 	
 	@PostMapping(value = "/verify", headers="Content-Type=application/json")
 	@ResponseBody
 	public String login(@RequestBody VerifyForm l){
 		
-		return sendMessage("verify", verifyByToken(l));
+		return sendMessage("verify", verifyByToken(l), "admin", verifyIfAdminByToken(l));
 	}
 	
 	@PostMapping(value = "/register", headers="Content-Type=application/json")
@@ -167,7 +167,7 @@ public class IndexController {
 		DataManager manager = new DataManager();
 		User user = userRepository.findOneByToken(a.token);
 		try {
-			if(user.getToken() == a.token);
+			if(user.getToken().equals(a.token));
 			{
 				if(user.getRole().equals("admin"))
 				{
@@ -191,12 +191,25 @@ public class IndexController {
 	public String getUsers(@RequestBody VerifyForm l){
 		
 		DataManager manager = new DataManager();
-		List<User> user = userRepository.findAll();
-		if (user.size() != 0)
-		{
-			return manager.getUsersStringJson(user);
+		User user = userRepository.findOneByToken(l.token);
+		try {
+			if(user.getToken().equals(l.token) && user.getRole().equals("admin")) {
+				List<User> users = userRepository.findAll();
+				if (users.size() != 0)
+				{
+					return manager.getUsersStringJson(users);
+				}
+				else return "[]";
+			}else {
+				return sendMessage("error", "access denided");
+			}
 		}
-		else return "[]";
+		catch(Exception e)
+		{
+			return sendMessage("error", "disconected");
+		}
+		
+		
 	}
 	
 	@PostMapping("/deleteUserByAdmin")
@@ -206,43 +219,47 @@ public class IndexController {
 		DataManager manager = new DataManager();
 		User user = userRepository.findOneByToken(a.token);
 		try {
-			if(user.getToken() == a.token);
+			if(user.getToken().equals(a.token))
 			{
 				if(user.getRole().equals("admin"))
 				{
-				
-				user = userRepository.findOneByUserId(Integer.parseInt(a.userId)); //nowy user (wskazuje na niego admin)
-				List<Bill> bill = billRepository.findByUserId(user.getUserId());   //lista paragonow
-				
-				
-				//usuwanie paragonow
-				try {
-					for(Object o : bill)
+
+					System.out.println(user.getToken() + user.getRole());
+					user = userRepository.findOneByUserId(Integer.parseInt(a.userId)); //nowy user (wskazuje na niego admin)
+					List<Bill> bill = billRepository.findByUserId(user.getUserId());   //lista paragonow
+					
+					
+					//usuwanie paragonow
+					try {
+						for(Object o : bill)
+						{
+							Bill b = (Bill) o;
+							billRepository.delete(b);
+						}
+					}catch(Exception e)
 					{
-						Bill b = (Bill) o;
-						billRepository.delete(b);
+						return sendMessage("error", "Cant delete bills");
 					}
-				}catch(Exception e)
-				{
-					return sendMessage("error", "Cant delete bills");
-				}
-				
-				//usuwanie usera
-				try {
+					
+					//usuwanie usera
+					try {
+						userRepository.delete(user);
+					}catch(Exception e)
+					{
+						return sendMessage("error", "Cant delete user");
+					}
 					userRepository.delete(user);
-				}catch(Exception e)
-				{
-					return sendMessage("error", "Cant delete user");
-				}
-				userRepository.delete(user);
-				return "{}";
+					
+					return "{}";
 				}
 				else return sendMessage("error","no privileges");
 			}	
 		}catch(Exception e)
 		{
+			e.printStackTrace(System.out);
 			return sendMessage("error", "disconected");
 		}
+		return null;
 	}
 	
 	@PostMapping("/deleteUser")
@@ -251,7 +268,7 @@ public class IndexController {
 	
 		User user = userRepository.findOneByToken(a.token);
 		try {
-			if(user.getToken() == a.token)
+			if(user.getToken().equals(a.token))
 			{
 				List<Bill> bill = billRepository.findByUserId(user.getUserId());
 				
@@ -278,6 +295,8 @@ public class IndexController {
 			else return sendMessage("error", "Disconected");
 		}catch(Exception e)
 		{
+
+			e.printStackTrace(System.out);
 			return sendMessage("error", "No user found");
 		}
 	}
@@ -306,7 +325,7 @@ public class IndexController {
 				return sendMessage("error", "No logged user found");
 			}
 		}
-		return "[]";
+		return sendMessage("count","0");
 	}
 	
 	/*
@@ -349,26 +368,28 @@ public class IndexController {
 			User user = userRepository.findOneByToken(l.token);
 			try {
 				List<Bill> bills; 
-				switch(l.sortMode) {
-				case "ascending": bills = billRepository.findByUserId(user,Sort.by(l.sortBy).ascending()); break;
-				case "descending":  bills = billRepository.findByUserId(user,Sort.by(l.sortBy).descending()); break;
-				default: return sendMessage("error", "Unknown command");
+					switch(l.sortMode) {
+					case "ascending": bills = billRepository.findByUserId(user,Sort.by(l.sortBy).ascending()); break;
+					case "descending":  bills = billRepository.findByUserId(user,Sort.by(l.sortBy).descending()); break;
+					default: return sendMessage("error", "Unknown command");
 				}
+					
 				if(bills.size() > 0)
 				{
-				DataManager manager = new DataManager();
-				
-				int offset, count;
-				offset = Integer.parseInt(l.offset);
-				count = Integer.parseInt(l.count);
-		
-				List<Bill> newBills = new ArrayList<>();
-				for(int i = offset -1; i < offset-1 + count; i++ )
-				{
-					if(i == bills.size())break; //zabezpieczenie zeby nie bylo ze pobierasz 1-10 a sa tylko 2 rekordy
-					newBills.add(bills.get(i));
-				}	
-				return manager.getBillsStringJson(newBills.toArray());
+					DataManager manager = new DataManager();
+					
+					int offset, count;
+					offset = Integer.parseInt(l.offset);
+					count = Integer.parseInt(l.count);
+			
+					List<Bill> newBills = new ArrayList<>();
+					for(int i = offset -1; i < offset-1 + count; i++ )
+					{
+						if(i == bills.size())break; //zabezpieczenie zeby nie bylo ze pobierasz 1-10 a sa tylko 2 rekordy
+						newBills.add(bills.get(i));
+					}	
+					
+					return manager.getBillsStringJson(newBills.toArray());
 				} 
 			}catch(Exception e)
 			{
@@ -509,7 +530,13 @@ public class IndexController {
 	//************
 	// JSON CREATOR
 	//************
-
+	
+	public String sendMessage(String name, String value, String name2, String value2)
+	{
+		String message = "{\"" + name + "\":\"" + value + "\",\""+name2 + "\":\"" + value2 + "\"}";
+		return message;
+	}
+	
 	public String sendMessage(String name, String value)
 	{
 		String message = "{\"" + name + "\":\"" + value + "\"}";
@@ -520,8 +547,22 @@ public class IndexController {
 	{
 		User user = userRepository.findOneByToken(l.token);
 		try {
-			if(user.getToken() == l.token);
+			if(user.getToken().equals(l.token));
 			return "ok";
+		}catch(Exception e)
+		{
+			return "bad";
+		}
+	}
+	
+	public String verifyIfAdminByToken(VerifyForm l)
+	{
+		User user = userRepository.findOneByToken(l.token);
+		try {
+			if(user.getRole().equals("admin"))
+				return "ok";
+			else
+				return "bad";
 		}catch(Exception e)
 		{
 			return "bad";
@@ -532,7 +573,7 @@ public class IndexController {
 	{
 		User user = userRepository.findOneByToken(token);
 		try {
-			if(user.getToken() == token);
+			if(user.getToken().equals(token));
 			return "ok";
 		}catch(Exception e)
 		{

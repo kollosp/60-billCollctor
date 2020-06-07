@@ -108,23 +108,23 @@ public class DataManager {
 	
 	public String getBillsStringJson(Object bills[])
 	{
-	        String completeJSON = "[";
-	        
-	        for(@SuppressWarnings("unused") Object o : bills)
-	        {
-	        	Bill newBill = (Bill)o;
-	        
-	        	String t1,t2,t3;
-	        	t1 = String.valueOf(newBill.getId());
-	        	t2 = newBill.getDate();
-	        	
-	        	t3 = String.valueOf(newBill.getPrice());
-	     
-	            String temp = getTempJsonBills(t1,t2,t3);
-	            
-	            completeJSON += temp;
-	        }
-	        completeJSON =  completeJSON.substring(0, completeJSON.length()-1);
+        String completeJSON = "[";
+        
+        for(@SuppressWarnings("unused") Object o : bills)
+        {
+        	Bill newBill = (Bill)o;
+        
+        	String t1,t2,t3;
+        	t1 = String.valueOf(newBill.getId());
+        	t2 = newBill.getDate();
+        	
+        	t3 = String.valueOf(newBill.getPrice());
+     
+            String temp = getTempJsonBills(t1,t2,t3);
+            
+            completeJSON += temp;
+        }
+        completeJSON =  completeJSON.substring(0, completeJSON.length()-1);
 		return completeJSON + "]";
 	}
 	
@@ -142,24 +142,26 @@ public class DataManager {
 		for(Object o : user)
 		{
 			User tempUser = (User) o;
-			String t1,t2,t3,t4,t5;
+			String t1,t2,t3,t4,t5,t6;
 			t1 = String.valueOf(tempUser.getUserId());
 			t2 = tempUser.getMail();
 			t3 = tempUser.getName();
 			t4 = tempUser.getSurname();
 			t5 = tempUser.getPhone();
+			t6 = tempUser.getRole();
 			
-			String temp  = getTempJsonUser(t1,t2,t3,t4,t5);
+			String temp  = getTempJsonUser(t1,t2,t3,t4,t5,t6);
 			completeJSON += temp;
 		}
 		 completeJSON =  completeJSON.substring(0, completeJSON.length()-1);
 		return completeJSON + "]";
 	}
 	
-	public String getTempJsonUser(String id, String email, String name, String sourname, String phone )
+	public String getTempJsonUser(String id, String email, String name, String sourname, String phone, String role)
 	{
 		String command = "{\"id\":\"" + id + "\",\"email\":\"" + email + "\", "
-				+ "\"name\":\"" + name+ "\",\"sourname\":\"" + sourname + "\",\"phone\":\"" + phone + "\"},";
+				+ "\"name\":\"" + name+ "\",\"surname\":\"" + sourname + "\",\"phone\":\"" +
+				phone + "\",\"role\":\"" + role +"\"},";
 				
 				return command;
 	}

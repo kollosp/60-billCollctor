@@ -7,8 +7,14 @@
                     <div class="columns is-centered">
                         <div class="column is-12-tablet is-9-desktop is-8-widescreen">
                             <router-view></router-view>
-                            <button class="button is-link" v-on:click="logout()">Wyloguj</button>
-                            <button class="button is-danger" v-on:click="remove()">Usun konto</button>
+                            <div class="buttons">
+                                <button class="button is-link" v-on:click="switchToClientMode()">Przejdz do menu klienta</button>
+                                <button class="button is-link" v-on:click="logout()">Wyloguj</button><div class="control">
+                                <router-link to="/dashboard/stat" class="button is-link">
+                                    Statystyki
+                                </router-link>
+                            </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -46,7 +52,7 @@
                 axios.post("/verify",{
                     token: token
                 }).then(m => {
-                    if(m.data.verify != 'ok'){
+                    if(m.data.verify != 'ok' || m.data.admin != "ok"){
                         window.sessionStorage.setItem("token", null)
                         this.$router.push({path: "/sessionend", query: {d: this.$router.currentRoute.path}}).catch(err => {})
                     }
@@ -57,7 +63,7 @@
             },
 
             logout: function () {
-
+                console.log("this.token", this.token)
                 axios.post("/logout",{
                     token: this.token
                 }).then(m => {
@@ -70,17 +76,8 @@
                 })
             },
 
-            remove: function () {
-                axios.post("/deleteUser",{
-                    token: this.token
-                }).then(m => {
-                    window.sessionStorage.setItem("token", null)
-                    this.$router.push({path: "/login"}).catch(err => {})
-                }).catch(e => {
-                    console.error(e)
-                    window.sessionStorage.setItem("token", null)
-                    this.$router.push({path: "/login"}).catch(err => {})
-                })
+            switchToClientMode: function () {
+                this.$router.push({path: "/"}).catch(err => {})
             }
         }
     }

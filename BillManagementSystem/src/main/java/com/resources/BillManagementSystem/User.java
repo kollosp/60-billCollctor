@@ -53,6 +53,7 @@ public class User {
 		this.surname = surname;
 		this.phone = phone;
 		this.mail = mail;
+		this.role = "client";
 	}
 
 	

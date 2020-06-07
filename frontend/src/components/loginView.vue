@@ -46,11 +46,6 @@
                                                 Zarejestruj się
                                             </router-link>
                                         </div>
-                                        <div class="control">
-                                            <router-link to="/statistics" class="button is-link">
-                                                Statystyki
-                                            </router-link>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -109,18 +104,23 @@
 
                         //save logged in status
                         this.$root.$data.token = m.data.token
-
-                        if(this.$root.$data.token.indexOf('admin')>=0) {
-                            this.$root.$data.adminMode = true
-                        }
-
                         window.sessionStorage.setItem('token', m.data.token);
+
+
+
+
 
                         //redirect to panel
                         if(this.$route.query.d) {
                             this.$router.push({path: this.$route.query.d.toString()}).catch(err => {})
                         }else{
-                            this.$router.push('/').catch(err => {})
+                            if(m.data.admin == "ok") {
+                                this.$router.push('/dashboard').catch(err => {})
+                            }else {
+                                this.$router.push('/').catch(err => {})
+                            }
+
+
                         }
                     }
                     //handle errors
