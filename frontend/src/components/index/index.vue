@@ -13,7 +13,7 @@
         <div class="field">
             <label class="label">Wyszukaj fraze</label>
             <div class="control">
-                <input v-on:change="reloadPage" v-model="text" class="input" type="text" placeholder="Wprowdz wyszukiwana fraze">
+                <input v-on:change="reloadFiltered" v-model="text" class="input" type="text" placeholder="Wprowdz wyszukiwana fraze">
             </div>
         </div>
 
@@ -104,6 +104,19 @@
         },
 
         methods: {
+            reloadFiltered: function(){
+                axios.post('/getBillCount', {
+                    token: this.token,
+                    descString: this.text
+                }).then(m => {
+                    this.billsCount  = m.data.count
+                    this.reloadPage()
+
+                }).catch(e => {
+                    console.error(e)
+                })
+            },
+
             pageChanged: function(first, count){
                 this.offset = first
                 this.reloadPage()
