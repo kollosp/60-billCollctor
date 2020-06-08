@@ -33,6 +33,9 @@ public class BillManagementSystemApplication implements CommandLineRunner{
 	public void run(String... args) {
    
 		/*
+		  
+		Różne gotowe funkcje do testów
+		
 		String t1,t2;
 		t1 = "test";
 		t2 = "test";
@@ -45,15 +48,18 @@ public class BillManagementSystemApplication implements CommandLineRunner{
 		
 		//User user = userRepository.findOneByName("a");
 		//User user = userRepository.findOneByToken(l.token,Sort.by(sortBy).ascending());
-		//User user = userRepository.findOneByUserId(9);
-		//System.out.println(user.getValue());
+		/*User user = userRepository.findOneByUserId(9);
+		System.out.println(user.getValue());
 		
-		//Set<Bill> bills = user.getBills();
-		//System.out.println(bills.size());
-		//Object o = bills.toArray();
-		//List<Object> newBills = Arrays.asList(bills.toArray());
+		List<Bill> newBills = billRepository.findByUserIdAndDescriptionContaining(user, "", Sort.by("description").ascending());
 		
-
+		int i =0;
+		for(@SuppressWarnings("unused") Object o : newBills)
+        {
+        	Bill newBill  = newBills.get(i);
+        	i++;
+        	System.out.println(newBill.getDescription());
+        }*/
 		//DataManager manager = new DataManager();
 		//manager.sortBills(bills, "price");
 		

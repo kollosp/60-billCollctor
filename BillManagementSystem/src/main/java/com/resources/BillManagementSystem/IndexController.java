@@ -60,6 +60,15 @@ class GetBills{
 	public String sortMode; // ascending, descending
 }
 
+class GetSpecificBills{
+	public String token;
+	public String offset; //przesuniecie (liczysz od 1, czyli jak ktos chce wyswietlic 11-20, to wysylasz 11-20, choc w tablicy to jest 10-19)
+	public String count; //ile pobrac 
+	public String sortBy; // price, date
+	public String sortMode; // ascending, descending
+	public String descString; //jakieś wyrażenie z opisu (moze byc ze spacjami, dowolnie)
+}
+
 class AdminMode{
 	public String token;
 	public String userId;
@@ -208,9 +217,9 @@ public class IndexController {
 		{
 			return sendMessage("error", "disconected");
 		}
-		
-		
 	}
+	
+	
 	
 	@PostMapping("/deleteUserByAdmin")
 	@ResponseBody
@@ -226,7 +235,7 @@ public class IndexController {
 
 					System.out.println(user.getToken() + user.getRole());
 					user = userRepository.findOneByUserId(Integer.parseInt(a.userId)); //nowy user (wskazuje na niego admin)
-					List<Bill> bill = billRepository.findByUserId(user.getUserId());   //lista paragonow
+					List<Bill> bill = billRepository.findByUserId(user);   //lista paragonow
 					
 					
 					//usuwanie paragonow
@@ -270,7 +279,8 @@ public class IndexController {
 		try {
 			if(user.getToken().equals(a.token))
 			{
-				List<Bill> bill = billRepository.findByUserId(user.getUserId());
+				//List<Bill> bill = billRepository.findByUserId(user.getUserId());
+				List<Bill> bill = billRepository.findByUserId(user);
 				
 				try {
 					for(Object o : bill)
@@ -328,34 +338,6 @@ public class IndexController {
 		return sendMessage("count","0");
 	}
 	
-	/*
-	@PostMapping(value = "/getBills", headers="Content-Type=application/json")
-	@ResponseBody
-	public String getBills(@RequestBody VerifyForm l){
-		
-		String temp = verifyByToken(l);
-		System.out.println(temp);
-		if(verifyByToken(l) == "ok")
-		{
-			//pobierz liste wszystkie paragony
-			User user = userRepository.findOneByToken(l.token);
-			//User user = userRepository.findOneByToken(l.token,Sort.by(sortBy).ascending());
-			try {
-				Set<Bill> bills = user.getBills();
-				if(bills.size() > 0)
-				{
-				DataManager manager = new DataManager();
-				manager.sortBills(bills, sortBy);
-				return manager.getBillsStringJson(bills.toArray());
-				} 
-			}catch(Exception e)
-			{
-				System.out.println(e);
-				return sendMessage("error", "No logged user found");
-			}
-		}
-		return "[]";
-	}*/
 	
 	@PostMapping(value = "/getBills", headers="Content-Type=application/json")
 	@ResponseBody
@@ -371,6 +353,48 @@ public class IndexController {
 					switch(l.sortMode) {
 					case "ascending": bills = billRepository.findByUserId(user,Sort.by(l.sortBy).ascending()); break;
 					case "descending":  bills = billRepository.findByUserId(user,Sort.by(l.sortBy).descending()); break;
+					default: return sendMessage("error", "Unknown command");
+				}
+					
+				if(bills.size() > 0)
+				{
+					DataManager manager = new DataManager();
+					
+					int offset, count;
+					offset = Integer.parseInt(l.offset);
+					count = Integer.parseInt(l.count);
+			
+					List<Bill> newBills = new ArrayList<>();
+					for(int i = offset -1; i < offset-1 + count; i++ )
+					{
+						if(i == bills.size())break; //zabezpieczenie zeby nie bylo ze pobierasz 1-10 a sa tylko 2 rekordy
+						newBills.add(bills.get(i));
+					}	
+					
+					return manager.getBillsStringJson(newBills.toArray());
+				} 
+			}catch(Exception e)
+			{
+				System.out.println(e);
+				return sendMessage("error", "No logged user found");
+			}
+		
+		}
+		return "[]";
+	}
+	
+	@PostMapping(value = "/getSpecificBills", headers="Content-Type=application/json")
+	@ResponseBody
+	public String getSpecificBills(@RequestBody GetSpecificBills l){
+		
+		if(verifyByTokenString(l.token).equals("ok"))
+		{
+			User user = userRepository.findOneByToken(l.token);
+			try {
+				List<Bill> bills; 
+					switch(l.sortMode) {
+					case "ascending": bills = billRepository.findByUserIdAndDescriptionContaining(user,l.descString, Sort.by(l.sortBy).ascending()); break;
+					case "descending":  bills =billRepository.findByUserIdAndDescriptionContaining(user,l.descString, Sort.by(l.sortBy).descending()); break;
 					default: return sendMessage("error", "Unknown command");
 				}
 					
@@ -448,7 +472,7 @@ public class IndexController {
 		try{
 			user = userRepository.findOneByToken(l.token);
 			byte[] image = {};
-			Bill bill = new Bill(user,image,10,"New bill", manager.getActualDate());
+			Bill bill = new Bill(user,image,0,"New bill", manager.getActualDate());
 			
 			try{
 			billRepository.save(bill);
@@ -467,9 +491,7 @@ public class IndexController {
 	@PostMapping(value = "/modifyBill", headers="Content-Type=application/json")
 	@ResponseBody
 	public String modifyBill(@RequestBody BillModifyForm l){
-		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
-		//poprawny token
-		//jezeli  wystapil blad to zwracamy {error: <opis>}
+
 		User user;
 		Bill bill;
 		try{
@@ -504,8 +526,7 @@ public class IndexController {
 		
 		
 		User user;
-		//jezeli uzytkownik o podanym tokenie posiada rachunek o id = l.id to usuwany 
-				//poprawny token
+		
 		try{
 			user = userRepository.findOneByToken(l.token);
 			Bill bill = user.getBillById(l.id);
@@ -514,10 +535,7 @@ public class IndexController {
 			if(bill == null) {
 				return sendMessage("error", "Bill not found");
 			}
-			
 			billRepository.delete(bill);
-			
-			//nie bylo bledu
 			return "{}";
 			
 		}catch(Exception e) {
@@ -542,6 +560,10 @@ public class IndexController {
 		String message = "{\"" + name + "\":\"" + value + "\"}";
 		return message;
 	}
+	
+	//**************
+	//WERYFIKACJA
+	//***************
 	
 	public String verifyByToken(VerifyForm l)
 	{

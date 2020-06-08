@@ -168,14 +168,7 @@ public class DataManager {
 	
 	public Boolean test(User user,String text)
 	{
-		// Hash a password for the first time
-		
-		// gensalt's log_rounds parameter determines the complexity
-		// the work factor is 2**log_rounds, and the default is 10
-		//String hashed = BCrypt.hashpw(user.getPassw(), BCrypt.gensalt(12));
 
-		// Check that an unencrypted password matches one that has
-		// previously been hashed
 		System.out.println("'"+text + "'" + user.getPassw()+"'");
 		if (BCrypt.checkpw(text, user.getPassw()))
 			return true;
@@ -195,9 +188,8 @@ public class DataManager {
 
 	public void sortBills(Set<Bill> bills, String sortBy) {
 		
-		//List<Bill> newbills = convertToList(bills);
 		List<Object> newbills = Arrays.asList(bills.toArray());
-		//List<Bill> newbills = new ArrayList<>(bills);
+
 		
 		Comparator<Object> compareByPrice = (Object o1, Object o2) -> Float.compare(((Bill) o1).getPrice(), ((Bill) o1).getPrice()); 
 		newbills.sort(compareByPrice);
@@ -213,14 +205,11 @@ public class DataManager {
 	// Generic function to convert set to list
 	public static <T> List<T> convertToList(Set<T> set)
 	{
-		// create an empty list
-		List<T> items = new ArrayList<>();
 
-		// push each element in the set into the list
+		List<T> items = new ArrayList<>();
 		for (T e : set)
 			items.add(e);
 
-		// return the list
 		return items;
 	}
 	
