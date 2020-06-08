@@ -31,6 +31,11 @@ class VerifyForm {
     public String token;
 }
 
+class NewVerifyForm {
+    public String token;
+    public String descString;
+}
+
 class BillForm {
 	public String token;
 	public int id;
@@ -318,16 +323,17 @@ public class IndexController {
 	
 	@PostMapping(value = "/getBillCount", headers="Content-Type=application/json")
 	@ResponseBody
-	public String getBillCount(@RequestBody VerifyForm l){
+	public String getBillCount(@RequestBody NewVerifyForm l){
 		
-		String temp = verifyByToken(l);
-		System.out.println(temp);
-		if(verifyByToken(l).equals("ok"))
+		//String temp = verifyByTokenString(l.token);
+		//System.out.println(temp);
+		if(verifyByTokenString(l.token).equals("ok"))
 		{
 			//pobierz liste wszystkie paragony
 			User user = userRepository.findOneByToken(l.token);
 			try {
-				Set<Bill> bills = user.getBills();
+				//Set<Bill> bills = user.getBills();
+				List<Bill> bills = billRepository.findByUserIdAndDescriptionContaining(user, l.descString, Sort.by("price").ascending());
 				return sendMessage("count",String.valueOf(bills.size()));
 			}catch(Exception e)
 			{
