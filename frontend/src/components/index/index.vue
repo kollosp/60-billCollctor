@@ -10,6 +10,13 @@
             </p>
         </div>
 
+        <div class="field">
+            <label class="label">Wyszukaj fraze</label>
+            <div class="control">
+                <input v-on:change="reloadPage" v-model="text" class="input" type="text" placeholder="Wprowdz wyszukiwana fraze">
+            </div>
+        </div>
+
         <table class="table is-narrow">
             <tr>
                 <th>L.P</th>
@@ -32,6 +39,7 @@
                 </td>
             </tr>
         </table>
+
 
         <div class="box">
             <h3 class="subtitle">Konfiguracja tabelki</h3>
@@ -86,6 +94,7 @@
                 offset: 0,
                 elementsPerPage: 5,
                 sort: 1,
+                text: "",
             }
         },
 
@@ -101,12 +110,13 @@
             },
 
             reloadPage: function(){
-                axios.post('/getBills', {
+                axios.post('/getSpecificBills', {
                     token: this.token,
                     offset: this.offset,
                     count: this.elementsPerPage,
                     sortBy: this.sort%2 == 0 ? "date" : "price",
-                    sortMode: this.sort < 3 ? "ascending" : "descending"
+                    sortMode: this.sort < 3 ? "ascending" : "descending",
+                    descString: this.text
                 }).then(m => {
                     this.bills = m.data
                     console.log(this.bills)
@@ -117,7 +127,8 @@
 
             loadBillCount: function(){
                 axios.post('/getBillCount', {
-                    token: this.token
+                    token: this.token,
+                    descString: this.text
                 }).then(m => {
                     this.billsCount  = m.data.count
                     if(this.billsCount > 0){
