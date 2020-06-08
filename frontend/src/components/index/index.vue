@@ -20,7 +20,7 @@
             </tr>
             <h1 v-if="bills.length == 0">Nie został dodany jeszcze zaden rachunek!</h1>
             <tr v-for="(item, index) in bills">
-                <td>{{parseInt(index)+1 + offset}}</td>
+                <td>{{parseInt(index)+ offset}}</td>
                 <td>{{item.id}}</td>
                 <td>{{item.date}}</td>
                 <td>{{item.price}}</td>
@@ -138,7 +138,7 @@
                         this.$refs.message.showDanger("", m.data.error)
                     }else{
                         this.$refs.message.showSuccess("", "Dodano rachunek")
-                        this.load()
+                        this.loadBillCount()
                     }
                 })
             },
@@ -154,7 +154,7 @@
                             this.$refs.message.showDanger("", m.data.error)
                         }else{
                             this.$refs.message.showSuccess("", "Usunięto rachunek")
-                            this.load()
+                            this.loadBillCount()
                         }
                     })
                 }else{

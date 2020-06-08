@@ -55,12 +55,16 @@
             previous: function () {
                 if(this.currentPage > 1){
                     this.currentPage--
+
+                    this.$emit("pageChanged", (this.currentPage-1)*this.elementsPerPage+1, this.elementsPerPage)
                 }
             },
 
             next: function () {
                 if(this.currentPage < this.pageCount){
                     this.currentPage++
+
+                    this.$emit("pageChanged", (this.currentPage-1)*this.elementsPerPage+1, this.elementsPerPage)
                 }
             },
             gotoPage: function (p) {
