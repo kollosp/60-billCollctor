@@ -2,7 +2,8 @@
 
 ### Description
 ```
-Project allow user to create unique account on webpage where he can put editable photos of bills with description. User also can sort searching data. Admin can modify all data.
+Project allow user to create unique account on webpage where he can put editable photos of bills with description. 
+User also can sort searching data. Admin can modify all data.
 ```
 
 ### Technology
